@@ -4,6 +4,7 @@
   "description": "",
   "main": "config.js",
   "scripts": {
+    "start": "nodemon server/index.js -w server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -17,12 +18,13 @@
   },
   "homepage": "https://github.com/Boutique-Design-API/Reviews-API#readme",
   "dependencies": {
-    "nodemon": "^2.0.15",
     "axios": "^0.26.0",
     "cors": "^2.8.5",
     "express": "^4.17.3",
     "mongodb": "^4.4.0",
     "morgan": "^1.10.0",
+    "nodemon": "^2.0.15",
+    "pg": "^8.7.3",
     "postgres": "^1.0.2"
   }
 }
