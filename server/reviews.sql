@@ -62,6 +62,6 @@ CREATE TABLE meta_data(
       on delete cascade
 );
 COPY meta_data(data_id, char_id, review_id, data_value)
-FROM '/Users/estevangonzalez/sdc/csv/characteristics.csv'
+FROM '/Users/estevangonzalez/sdc/csv/characteristic_reviews.csv'
 DELIMITER ','
 CSV HEADER;
