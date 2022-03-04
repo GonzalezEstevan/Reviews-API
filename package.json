@@ -5,6 +5,7 @@
   "main": "config.js",
   "scripts": {
     "start": "nodemon server/index.js -w server",
+    "create-db": "psql postgres < server/reviews.sql",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {

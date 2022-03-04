@@ -1,9 +1,16 @@
 const express = require('express');
 const app = express();
 const pool = require('./db')
+const router = require('./routers.js')
+const PORT = 3000;
+const morgan = require('morgan');
 
 app.use(express.json()) //gives us req.body
+app.use(morgan('dev'))
 
-app.listen(5432, () => {
-  console.log('Server Is Listening ;)')
+app.use('/api', router)
+
+
+app.listen(PORT, () => {
+  console.log(`Server Is Listening on PORT: ${PORT} ;)`)
 })
