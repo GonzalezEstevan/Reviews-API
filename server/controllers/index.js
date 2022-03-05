@@ -8,15 +8,21 @@ const controller = {
       count ? count : 5;
       try {
         const reviews = await pool.query(
-          `SELECT product_id AS product,
-            (SELECT json_agg(json_build_object('review_id', review_id, 'rating', rating, 'summary', summary,
-                                    'recommend', recommend, 'response', response, 'body', body,
-                                    'date', review_date, 'reviewer_name', reviewer_name, 'helpfulness', helpfulness
-                                    ))
-                                      AS results FROM reviews WHERE product_id = $1)
-          FROM reviews WHERE product_id = $1`
-          , [product_id])
-        // console.log(reviews.rows[0])
+          `SELECT product_id,
+            ARRAY_AGG(json_build_object('review_id', review_id,
+            'rating', rating,
+            'summary', summary,
+           'recommend', recommend,
+           'response', response,
+           'body', body,
+           'date', review_date,
+           'reviewer_name', reviewer_name,
+           'helpfulness', helpfulness,
+           'photos', (SELECT COALESCE(ARRAY_AGG(json_build_object('id', photo_id, 'url', url_tag)),'{}') AS photos FROM photos WHERE reviews.review_id = photos.review_id)
+           )) AS results
+          FROM reviews WHERE product_id = $1
+          GROUP BY product_id
+          `, [product_id])
         res.status(200).send(reviews.rows[0])
       }
       catch (err) {
@@ -24,15 +30,28 @@ const controller = {
       }
     },
 
-
+    addReview: async (req,res) => {
+      const {product_id, rating, summary, body, recommend, name, email, photos, characteristics} = req.body
+      try {
+        const add = await pool.query(
+          `INSERT INTO reviews (product_id, rating, summary, body, recommend, name, email, photos, characteristics) VALUES ($1, $2, $3, $4, $5, $6, &7, $8, $9)`
+        ,[product_id, rating, summary, body, recommend, name, email, photos, characteristics])
+        res.status(201).send(add.rows[0])
+      }
+      catch (err) {
+        res.status(400).send('ERROR POSTING REVIEW')
+      }
+    },
 
     getMetaData: async (req, res) => {
       var { product_id } = req.query
       try {
-        //INSERT CODE
+        const meta = await pool.query(
+          `SELECT json_build_object('ratings', rating) from `
+        ,[product_id])
       }
       catch (err) {
-        //INSERT CODE
+        res.status(400).send('')
       }
     },
 

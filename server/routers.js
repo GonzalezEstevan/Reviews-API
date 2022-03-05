@@ -4,6 +4,7 @@ var router = require('express').Router();
 
 router.route('/reviews')
   .get(controller.reviews.getReviews)
+  .post(controller.reviews.addReview)
 
 router.route('/reviews/meta')
   .get(controller.reviews.getMetaData)
@@ -13,5 +14,6 @@ router.route('/reviews/:review_id/helpful')
 
 router.route('/reviews/:review_id/reported')
   .put(controller.reviews.reportReview)
+
 
 module.exports = router;
