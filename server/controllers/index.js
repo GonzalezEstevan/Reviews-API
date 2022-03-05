@@ -10,8 +10,8 @@ const controller = {
         const reviews = await pool.query(
           `SELECT product_id,
             ARRAY_AGG(json_build_object('review_id', review_id,
-            'rating', rating,
-            'summary', summary,
+           'rating', rating,
+           'summary', summary,
            'recommend', recommend,
            'response', response,
            'body', body,
@@ -23,7 +23,7 @@ const controller = {
           FROM reviews WHERE product_id = $1
           GROUP BY product_id
           `, [product_id])
-        res.status(200).send(reviews.rows[0])
+        res.status(200).send(reviews.rows)
       }
       catch (err) {
         res.status(400).send(`ERROR: GET request for Reviews`, err)
@@ -34,7 +34,7 @@ const controller = {
       const {product_id, rating, summary, body, recommend, name, email, photos, characteristics} = req.body
       try {
         const add = await pool.query(
-          `INSERT INTO reviews (product_id, rating, summary, body, recommend, name, email, photos, characteristics) VALUES ($1, $2, $3, $4, $5, $6, &7, $8, $9)`
+          `INSERT INTO reviews (product_id, rating, summary, body, recommend, name, email, photos, characteristics) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`
         ,[product_id, rating, summary, body, recommend, name, email, photos, characteristics])
         res.status(201).send(add.rows[0])
       }
@@ -47,11 +47,17 @@ const controller = {
       var { product_id } = req.query
       try {
         const meta = await pool.query(
-          `SELECT json_build_object('ratings', rating) from `
+         `SELECT reviews.product_id,
+          (SELECT (json_build_object(rating, count(*))) AS rating),
+          (SELECT (json_build_object(count(*) - 1, count(*))) AS recommend)
+          FROM reviews
+            INNER JOIN characteristics ON characteristics.review_id = reviews.review_id
+              WHERE reviews.product_id = $1;`
         ,[product_id])
+        res.status(200).send(meta.rows)
       }
       catch (err) {
-        res.status(400).send('')
+        res.status(400).send('ERROR FETCHING META DATA')
       }
     },
 
@@ -92,3 +98,8 @@ module.exports = controller;
 
 // SELECT photo_id, url_tag FROM photos INNER JOIN reviews ON reviews.review_id = photos.review_id
 // (SELECT json_agg(json_build_object('id', photo_id, 'url', url_tag)) AS photos FROM photos INNER JOIN reviews ON reviews.review_id = photos.review_id)
+
+// SELECT product_id,
+//           (SELECT json_object_agg(rating, count(*))) AS ratings,
+//           (SELECT json_build_object(count(*) - 1, count(*))) AS recommend
+//           FROM reviews WHERE product_id = $1;
