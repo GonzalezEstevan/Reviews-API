@@ -48,13 +48,15 @@ const controller = {
       try {
         const meta = await pool.query(
          `SELECT reviews.product_id,
-          (SELECT (json_build_object(rating, count(*))) AS rating),
-          (SELECT (json_build_object(count(*) - 1, count(*))) AS recommend)
-          FROM reviews
-            INNER JOIN characteristics ON characteristics.review_id = reviews.review_id
-              WHERE reviews.product_id = $1;`
+                   (SELECT jsonb_object_agg(rating, rating)) AS rating,
+                   (SELECT (json_build_object(count(*) - 1, count(*))) AS recommend)
+                   FROM reviews
+                   INNER JOIN characteristics ON characteristics.review_id = reviews.review_id
+                   WHERE reviews.product_id = $1
+            GROUP BY reviews.product_id;`
         ,[product_id])
-        res.status(200).send(meta.rows)
+
+        res.status(200).send(meta.rows[0])
       }
       catch (err) {
         res.status(400).send('ERROR FETCHING META DATA')
@@ -103,3 +105,11 @@ module.exports = controller;
 //           (SELECT json_object_agg(rating, count(*))) AS ratings,
 //           (SELECT json_build_object(count(*) - 1, count(*))) AS recommend
 //           FROM reviews WHERE product_id = $1;
+
+
+// `SELECT reviews.product_id,
+//           (SELECT (json_build_object(rating, count(*))) AS rating),
+//           (SELECT (json_build_object(count(*) - 1, count(*))) AS recommend)
+//           FROM reviews
+//           INNER JOIN characteristics ON characteristics.review_id = reviews.review_id
+//           WHERE reviews.product_id = $1;`
