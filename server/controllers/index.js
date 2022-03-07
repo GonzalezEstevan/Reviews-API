@@ -20,17 +20,18 @@ const controller = {
       try {
         const reviews = await pool.query(
           `SELECT
-           ARRAY_AGG(json_build_object('review_id', reviews.review_id,
+           json_build_object('review_id', reviews.review_id,
            'rating', reviews.rating,
            'summary', reviews.summary,
            'recommend', reviews.recommend,
            'response', reviews.response,
            'body', reviews.body,
-           'date', TO_TIMESTAMP(CAST(reviews.review_date AS bigint)),
+           'date',
+           TO_CHAR(TO_TIMESTAMP(CAST(reviews.review_date AS bigint)::double precision / 1000), 'DD-MM-YYYY"T"HH24:MI:SS.MS"Z"' ),
            'reviewer_name', reviews.reviewer_name,
            'helpfulness', reviews.helpfulness,
            'photos', (SELECT COALESCE(ARRAY_AGG(json_build_object('id', photo_id, 'url', url_tag)),'{}') AS photos FROM photos WHERE reviews.review_id = photos.review_id)
-           )) AS results
+           )
           FROM reviews WHERE product_id = $1 AND reviews.reported = false
           GROUP BY product_id, reviews.review_id, reviews.rating,
           reviews.summary, reviews.recommend, reviews.response, reviews.body,
@@ -42,10 +43,11 @@ const controller = {
             product: product_id,
             page: page,
             count: count,
-            results: reviews.rows
+            results: reviews.rows.map(row => {
+              return row.json_build_object
+            })
           }
-
-
+          console.log(reviews)
         res.status(200).send(response)
       }
       catch (err) {
@@ -54,18 +56,36 @@ const controller = {
     },
 
     addReview: async (req,res) => {
-      var {product_id, rating, summary, body, recommend, name, email, photos, characteristics} = req.body
       var currentDate = Math.round((new Date()).getTime() / 1000)
+      var {product_id, rating, summary, body, recommend, reviewer_name, reviewer_email, photos, characteristics} = req.body
       try {
-        const add = await pool.query(
+        var add = await pool.query(
           `INSERT INTO reviews
           (product_id, rating, review_date, summary, body, recommend, reviewer_name, reviewer_email)
-          VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`
-        ,[product_id, rating, currentDate, summary, body, recommend, name, email])
-        res.status(201).send(add[0])
+          VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING review_id, rating`
+        ,[product_id, rating, currentDate, summary, body, recommend, reviewer_name, reviewer_email])
+          .then(async ({rows}) => {
+            var rating = rows[0].rating
+            var review_id = rows[0].review_id;
+            if (photos.length > 0 ) {
+              await photos.forEach(url_tag => {
+                pool.query(
+                `INSERT INTO photos
+                  (review_id, url_tag)
+                  VALUES($1, $2) RETURNING *;`, [review_id, url_tag])
+              })
+            }
+            for (var [id, rating] of Object.entries(characteristics)) {
+              await pool.query(
+                `INSERT INTO meta_data
+                (char_id, review_id, data_value)
+                VALUES ($1, $2, $3)`, [id, review_id, rating])
+            }
+            res.status(200).send('SUCCESS POSTING')
+          })
       }
       catch (err) {
-        res.status(400).send('ERROR POSTING REVIEW')
+        res.status(400).send(err)
       }
     },
 
@@ -74,13 +94,12 @@ const controller = {
       try {
         const meta = await pool.query(
          `SELECT reviews.product_id,
-                   (SELECT jsonb_object_agg(rating, (SELECT count(reviews.rating)  from reviews WHERE product_id = 900)  )) AS rating,
-                   (SELECT (json_build_object(0, count(recommend))) AS recommend),
-                   (SELECT (json_build_object(meta_data.data_value, 1)) FROM meta_data)
+                   (SELECT jsonb_object_agg(rating, (SELECT count(reviews.rating)  from reviews WHERE product_id = $1 )  )) AS rating,
+                   (SELECT (json_build_object(0, count(recommend))) AS recommend)
                    FROM reviews
                    INNER JOIN characteristics ON characteristics.review_id = reviews.review_id
                    INNER JOIN meta_data ON meta_data.review_id = reviews.review_id
-                   WHERE reviews.product_id = 900
+                   WHERE reviews.product_id = $1
             GROUP BY reviews.product_id;`
         ,[product_id])
 
@@ -90,7 +109,6 @@ const controller = {
         res.status(400).send('ERROR FETCHING META DATA')
       }
     },
-
 
 
     helpfulReview: async (req, res) => {
