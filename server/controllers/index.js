@@ -94,11 +94,23 @@ const controller = {
       try {
         const meta = await pool.query(
          `SELECT reviews.product_id,
-                   (SELECT jsonb_object_agg(rating, (SELECT count(reviews.rating)  from reviews WHERE product_id = $1 )  )) AS rating,
-                   (SELECT (json_build_object(0, count(recommend))) AS recommend)
+                   (SELECT json_build_object(
+                     1, (SELECT count(*) filter (where rating = 1)),
+                     2, (SELECT count(*) filter (where rating = 2)),
+                     3, (SELECT count(*) filter (where rating = 3)),
+                     4, (SELECT count(*) filter (where rating = 4)),
+                     5, (SELECT count(*) filter (where rating = 5))
+                    )) AS ratings,
+                   (SELECT json_build_object(
+                     true, (SELECT count(reviews.recommend) filter (where recommend = true)),
+                     false, (SELECT count(reviews.recommend) filter (where recommend = false))
+                   )) AS recommended,
+                   (SELECT (json_object_agg(prod_name, (SELECT (json_object_agg('id', (SELECT char_id FROM characteristics WHERE char_id IN (SELECT char_id from characteristics WHERE char_id IN (characteristics.char_id)))
+
+                   ))
+                   FROM characteristics WHERE product_id = $1 )  ))
+                   as characteristics FROM characteristics WHERE product_id = $1 )
                    FROM reviews
-                   INNER JOIN characteristics ON characteristics.review_id = reviews.review_id
-                   INNER JOIN meta_data ON meta_data.review_id = reviews.review_id
                    WHERE reviews.product_id = $1
             GROUP BY reviews.product_id;`
         ,[product_id])
@@ -106,7 +118,7 @@ const controller = {
         res.status(200).send(meta.rows)
       }
       catch (err) {
-        res.status(400).send('ERROR FETCHING META DATA')
+        res.status(400).send(err.message)
       }
     },
 
@@ -159,3 +171,21 @@ module.exports = controller;
 //           FROM reviews
 //           INNER JOIN characteristics ON characteristics.review_id = reviews.review_id
 //           WHERE reviews.product_id = $1;`
+
+
+// jsonb_object_agg(
+//   prod_name, (SELECT jsonb_object_agg('id', char_id) from characteristics ) )AS characteristics FROM characteristics
+//   INNER JOIN reviews
+//   ON characteristics.char_id = reviews.review_id WHERE reviews.product_id = $1)
+
+// (
+//   SELECT array_to_json(array_agg(allChar))
+//   FROM (
+//     SELECT characteristics.char_id
+//     FROM characteristics
+//     INNER JOIN meta_data
+//     ON characteristics.char_id = meta_data.char_id
+//     WHERE characteristics.product_id = reviews.product_id
+//     GROUP BY characteristics.char_id
+//   ) allChar
+// )
