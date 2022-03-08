@@ -105,11 +105,9 @@ const controller = {
                      true, (SELECT count(reviews.recommend) filter (where recommend = true)),
                      false, (SELECT count(reviews.recommend) filter (where recommend = false))
                    )) AS recommended,
-                   (SELECT (json_object_agg(prod_name, (SELECT (json_object_agg('id', (SELECT char_id FROM characteristics WHERE char_id IN (SELECT char_id from characteristics WHERE char_id IN (characteristics.char_id)))
+                    (SELECT json_object_agg(prod_name, json_build_object('id', characteristics.char_id, 'value', meta_data.data_value)) AS characteristics
+                    FROM characteristics JOIN meta_data ON characteristics.char_id = meta_data.data_id AND reviews.product_id = characteristics.product_id)
 
-                   ))
-                   FROM characteristics WHERE product_id = $1 )  ))
-                   as characteristics FROM characteristics WHERE product_id = $1 )
                    FROM reviews
                    WHERE reviews.product_id = $1
             GROUP BY reviews.product_id;`
@@ -189,3 +187,30 @@ module.exports = controller;
 //     GROUP BY characteristics.char_id
 //   ) allChar
 // )
+
+
+
+// (
+//   (SELECT json_build_object(array_agg(allChar))
+//   FROM (
+//     SELECT c.char_id AS id
+//     FROM characteristics c
+//     WHERE c.product_id = reviews.product_id
+//     GROUP BY c.char_id
+//   ) allChar
+// )) AS characteristics
+
+
+// (SELECT json_object_agg(prod_name,
+//   (
+//     (SELECT array_to_json(array_agg(allChar))
+//     FROM (
+//       SELECT c.char_id AS id
+//       FROM characteristics c
+//       LEFT JOIN meta_data ON c.char_id = meta_data.data_id
+//       WHERE c.product_id = reviews.product_id AND meta_data.data_id = c.char_id
+//       GROUP BY c.char_id LIMIT 1
+//     ) allChar
+//   ))
+//   )
+// AS characteristics FROM characteristics WHERE product_id = $1)
