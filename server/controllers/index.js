@@ -107,7 +107,6 @@ const controller = {
                    )) AS recommended,
                     (SELECT json_object_agg(prod_name, json_build_object('id', characteristics.char_id, 'value', meta_data.data_value)) AS characteristics
                     FROM characteristics JOIN meta_data ON characteristics.char_id = meta_data.data_id AND reviews.product_id = characteristics.product_id)
-
                    FROM reviews
                    WHERE reviews.product_id = $1
             GROUP BY reviews.product_id;`
