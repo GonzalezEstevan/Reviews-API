@@ -48,7 +48,7 @@ const controller = {
               return row.json_build_object
             })
           }
-            console.log("Executed Querie", {duration, rowCount: reviews.rowCount})
+            console.log("Executed Query", {duration, rowCount: reviews.rowCount})
         res.status(200).send(response)
       }
       catch (err) {
@@ -85,7 +85,7 @@ const controller = {
                 VALUES ($1, $2, $3)`, [id, review_id, rating])
             }
             const duration = Date.now() - start;
-            console.log("Executed Querie", {duration, rowCount: rows.rowCount})
+            console.log("Executed Query", {duration, rowCount: rows.rowCount})
             res.status(200).send('SUCCESS POSTING')
           })
       }
@@ -117,7 +117,7 @@ const controller = {
             GROUP BY reviews.product_id;`
         ,[product_id])
         const duration = Date.now() - start;
-        console.log("Executed Querie", {duration, rowCount: meta.rowCount})
+        console.log("Executed Query", {duration, rowCount: meta.rowCount})
         res.status(200).send(meta.rows)
       }
       catch (err) {
@@ -136,8 +136,8 @@ const controller = {
         `,[review_id]
         )
         const duration = Date.now() - start;
-        console.log("Executed Querie", {duration, rowCount: helpful.rowCount})
-        res.status(204).send(helpful.rows[0])
+        console.log("Executed Query", {duration, rowCount: helpful.rowCount})
+        res.status(200).send(helpful.rows[0])
       }
       catch (err) {
         res.status(400).send(`ERROR: PUT request for Helpful Reviews`, err)
@@ -154,8 +154,8 @@ const controller = {
           UPDATE reviews SET reported = true WHERE review_id = $1
         `,[review_id])
         const duration = Date.now() - start;
-        console.log("Executed Querie", {duration, rowCount: reporter.rowCount})
-        res.status(204).send(reporter.rows[0])
+        console.log("Executed Query", {duration, rowCount: reporter.rowCount})
+        res.status(200).send(reporter.rows[0])
       }
       catch (err) {
         res.status(400).send('ERROR REPORTING REVIEW')
