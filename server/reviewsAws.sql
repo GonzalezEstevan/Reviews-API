@@ -17,7 +17,7 @@ CREATE TABLE reviews(
 
 
 COPY reviews(review_id, product_id, rating, review_date, summary, body, recommend, reported, reviewer_name, reviewer_email, response, helpfulness)
-FROM '/home/unbuntu/sdc/reviews.csv'
+FROM '/home/ubuntu/sdc/reviews.csv'
 DELIMITER ','
 CSV HEADER;
 
@@ -36,7 +36,7 @@ CREATE TABLE photos(
 );
 
 COPY photos(photo_id, review_id, url_tag)
-FROM '/home/unbuntu/sdc/reviews_photos.csv'
+FROM '/home/ubuntu/sdc/reviews_photos.csv'
 DELIMITER ','
 CSV HEADER;
 
@@ -52,7 +52,7 @@ CREATE TABLE characteristics(
 
 
 COPY characteristics(char_id, product_id, prod_name)
-FROM '/home/unbuntu/sdc/characteristics.csv'
+FROM '/home/ubuntu/sdc/characteristics.csv'
 DELIMITER ','
 CSV HEADER;
 
@@ -69,7 +69,7 @@ CREATE TABLE meta_data (
 );
 
 COPY meta_data(data_id, char_id, review_id, data_value)
-FROM '/home/unbuntu/sdc/characteristic_reviews.csv'
+FROM '/home/ubuntu/sdc/characteristic_reviews.csv'
 DELIMITER ','
 CSV HEADER;
 CREATE INDEX data_idx ON meta_data USING btree (char_id);
