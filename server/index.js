@@ -2,7 +2,7 @@ const express = require('express');
 const app = express();
 const pool = require('./db')
 const router = require('./routers.js')
-const PORT = 3001;
+const PORT = 3000;
 const morgan = require('morgan');
 
 app.use(express.json()) //gives us req.body
