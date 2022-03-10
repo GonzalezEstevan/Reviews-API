@@ -52,7 +52,7 @@ const controller = {
         res.status(200).send(response)
       }
       catch (err) {
-        res.status(400).send(`ERROR: GET request for Reviews`, err)
+        res.status(400).send(err.message)
       }
     },
 
@@ -140,7 +140,7 @@ const controller = {
         res.status(200).send(helpful.rows[0])
       }
       catch (err) {
-        res.status(400).send(`ERROR: PUT request for Helpful Reviews`, err)
+        res.status(400).send(err.message)
       }
     },
 
