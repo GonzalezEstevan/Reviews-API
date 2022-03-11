@@ -2,58 +2,52 @@ const pool = require('../db')
 
 const controller = {
   reviews: {
-    getReviews: async (req, res) => {
-      var { product_id } = req.query
-      var page = req.query.page || 1;
-      var count = req.query.count || 5;
-      var sort = req.query.sort || 'newest';
-      const start = Date.now()
+    getReviews: (req, res) => {
+      let { product_id } = req.query;
+      let count = req.query.count || 5;
+      let page = req.query.page || 1;
+      let sort = req.query.sort || 'newest';
 
       if (sort === 'newest') {
-        sort = `ORDER BY review_date ASC`
+        sort = 'ORDER BY review_date DESC';
+      } else if (sort === 'helpful') {
+        sort = 'ORDER BY helpfulness DESC';
+      } else if (sort === 'relevant') {
+        sort = 'ORDER BY helpfulness DESC, review_date DESC';
       }
-      if (sort === 'helpful') {
-        sort = `ORDER BY helpfulness DESC`
-      }
-      if (sort === 'relevant') {
-        sort = `ORDER BY helpfulness DESC, review_date DESC`
-      }
-      try {
-        const reviews = await pool.query(
-          `SELECT
-           json_build_object('review_id', reviews.review_id,
-           'rating', reviews.rating,
-           'summary', reviews.summary,
-           'recommend', reviews.recommend,
-           'response', reviews.response,
-           'body', reviews.body,
-           'date',
-           TO_CHAR(TO_TIMESTAMP(CAST(reviews.review_date AS bigint)::double precision / 1000), 'DD-MM-YYYY"T"HH24:MI:SS.MS"Z"' ),
-           'reviewer_name', reviews.reviewer_name,
-           'helpfulness', reviews.helpfulness,
-           'photos', (SELECT COALESCE(ARRAY_AGG(json_build_object('id', photo_id, 'url', url_tag)),'{}') AS photos FROM photos WHERE reviews.review_id = photos.review_id)
-           )
-          FROM reviews WHERE product_id = $1 AND reviews.reported = false
-          GROUP BY product_id, reviews.review_id, reviews.rating,
-          reviews.summary, reviews.recommend, reviews.response, reviews.body,
-          reviews.review_date, reviews.reviewer_name, reviews.helpfulness
-          ${sort} LIMIT $2 OFFSET ${count * page - count};
-          `, [product_id, count])
-          const duration = Date.now() - start;
-          var response = {
+
+      pool.query(
+        `SELECT
+          json_build_object(
+            'review_id', reviews.review_id,
+            'rating', reviews.rating,
+            'summary', reviews.summary,
+            'recommend', reviews.recommend,
+            'response', reviews.response,
+            'body', reviews.body,
+            'date', TO_CHAR(TO_TIMESTAMP(CAST(reviews.review_date AS bigint)::double precision / 1000), 'DD-MM-YYYY"T"HH24:MI:SS.MS"Z"' ),
+            'reviewer_name', reviews.reviewer_name,
+            'helpfulness', reviews.helpfulness,
+            'photos',
+            (SELECT coalesce
+              (array_agg
+                (json_build_object(
+                  'id', photos.photo_id,
+                  'url', url_tag)),
+                  '{}')
+            AS photos FROM photos WHERE reviews.review_id = photos.review_id)
+          )
+        FROM reviews WHERE product_id = $1 AND reported = false ${sort} LIMIT $2 OFFSET ${count * page - count}`, [product_id, count])
+        .then((result) => {
+          let response = {
             product: product_id,
-            page: page,
-            count: count,
-            results: reviews.rows.map(row => {
-              return row.json_build_object
-            })
+            page,
+            count,
+            results: result.rows.map(row => { return row.json_build_object })
           }
-            console.log("Executed Query", {duration, rowCount: reviews.rowCount})
-        res.status(200).send(response)
-      }
-      catch (err) {
-        res.status(400).send(err.message)
-      }
+          res.status(200).send(response);
+        })
+        .catch((err) => res.status(400).send(err.message));
     },
 
     addReview: async (req,res) => {
@@ -155,10 +149,10 @@ const controller = {
         `,[review_id])
         const duration = Date.now() - start;
         console.log("Executed Query", {duration, rowCount: reporter.rowCount})
-        res.status(200).send(reporter.rows[0])
+        res.status(200).send('yah')
       }
       catch (err) {
-        res.status(400).send('ERROR REPORTING REVIEW')
+        res.status(400).send(err.message)
       }
     }
   }
@@ -225,3 +219,59 @@ module.exports = controller;
 //   ))
 //   )
 // AS characteristics FROM characteristics WHERE product_id = $1)
+
+
+
+// getReviews: async (req, res) => {
+//   var { product_id } = req.query
+//   var page = req.query.page || 1;
+//   var count = req.query.count || 5;
+//   var sort = req.query.sort || 'newest';
+//   const start = Date.now()
+
+//   if (sort === 'newest') {
+//     sort = `ORDER BY review_date ASC`
+//   }
+//   if (sort === 'helpful') {
+//     sort = `ORDER BY helpfulness DESC`
+//   }
+//   if (sort === 'relevant') {
+//     sort = `ORDER BY helpfulness DESC, review_date DESC`
+//   }
+//   try {
+//     const reviews = await pool.query(
+//       `SELECT
+//        json_build_object('review_id', reviews.review_id,
+//        'rating', reviews.rating,
+//        'summary', reviews.summary,
+//        'recommend', reviews.recommend,
+//        'response', reviews.response,
+//        'body', reviews.body,
+//        'date',
+//        TO_CHAR(TO_TIMESTAMP(CAST(reviews.review_date AS bigint)::double precision / 1000), 'DD-MM-YYYY"T"HH24:MI:SS.MS"Z"' ),
+//        'reviewer_name', reviews.reviewer_name,
+//        'helpfulness', reviews.helpfulness,
+//        'photos', (SELECT COALESCE(ARRAY_AGG(json_build_object('id', photo_id, 'url', url_tag)),'{}') AS photos FROM photos WHERE reviews.review_id = photos.review_id)
+//        )
+//       FROM reviews WHERE product_id = $1 AND reviews.reported = false
+//       GROUP BY product_id, reviews.review_id, reviews.rating,
+//       reviews.summary, reviews.recommend, reviews.response, reviews.body,
+//       reviews.review_date, reviews.reviewer_name, reviews.helpfulness
+//       ${sort} LIMIT $2 OFFSET ${count * page - count};
+//       `, [product_id, count])
+//       const duration = Date.now() - start;
+//       var response = {
+//         product: product_id,
+//         page: page,
+//         count: count,
+//         results: reviews.rows.map(row => {
+//           return row.json_build_object
+//         })
+//       }
+//         console.log("Executed Query", {duration, rowCount: reviews.rowCount})
+//     res.status(200).send(response)
+//   }
+//   catch (err) {
+//     res.status(400).send(err.message)
+//   }
+// },

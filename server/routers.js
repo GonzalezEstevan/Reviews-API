@@ -12,7 +12,7 @@ router.route('/reviews/meta')
 router.route('/reviews/:review_id/helpful')
   .put(controller.reviews.helpfulReview)
 
-router.route('/reviews/:review_id/reported')
+router.route('/reviews/:review_id/report')
   .put(controller.reviews.reportReview)
 
 
