@@ -3,6 +3,9 @@
 Creating a back end to deal with millions of rows of data consisting of complicated data shape
 while optimizing to handle over 4000 request per second
 
+#Built by
+* [Estevan Gonzalez](https://github.com/GonzalezEstevan)
+
 * Optimized web performance using
   * Indexing
   * Caching
@@ -25,9 +28,66 @@ while optimizing to handle over 4000 request per second
 
 # Overview Of Tables/Schema
 * Consited of four tables
-   * Reviews being the main table that was referenced by other tables
-   * Creating a join on Meta Data and Characteristics rather than using many aggregate functions, to lessen the strain of the Database cpu
-   *  ![ScreenShot](/screenshots/Screen%20Shot%202022-03-02%20at%206.09.07%20PM.png)
+   `Get /reviews`
+    ```json
+  {
+  "product": "2",
+  "page": 0,
+  "count": 5,
+  "results": [
+    {
+      "review_id": 5,
+      "rating": 3,
+      "summary": "I'm enjoying wearing these shades",
+      "recommend": false,
+      "response": null,
+      "body": "Comfortable and practical.",
+      "date": "2019-04-14T00:00:00.000Z",
+      "reviewer_name": "shortandsweeet",
+      "helpfulness": 5,
+      "photos": [{
+          "id": 1,
+          "url": "urlplaceholder/review_5_photo_number_1.jpg"
+        },
+        {
+          "id": 2,
+          "url": "urlplaceholder/review_5_photo_number_2.jpg"
+        },
+        // ...
+      ]
+    },
+    ```
+  * Meta Data
+   `Get /reviews/meta`
+  ```json
+  {
+    "product_id": "2",
+    "ratings": {
+      2: 1,
+      3: 1,
+      4: 2,
+      // ...
+    },
+    "recommended": {
+      0: 5
+      // ...
+    },
+    "characteristics": {
+      "Size": {
+        "id": 14,
+        "value": "4.0000"
+      },
+      "Width": {
+        "id": 15,
+        "value": "3.5000"
+      },
+      "Comfort": {
+        "id": 16,
+        "value": "4.0000"
+      },
+      // ...
+  }
+```
 
 ## Installation
 1. Git Fork and Clone this repo
