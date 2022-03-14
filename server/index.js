@@ -6,6 +6,7 @@ const PORT = 3000;
 const morgan = require('morgan');
 
 app.use(express.json()) //gives us req.body
+
 app.use(morgan('dev'))
 
 app.use('/api', router)
