@@ -21,10 +21,29 @@ while optimizing to handle over 4000 request per second
 
 # Testing
 * Testing Locally
-  * ![ScreenShot](/screenshots/Screen%20Shot%202022-03-11%20at%205.09.09%20PM.png)
+   ![ScreenShot](/screenshots/Screen%20Shot%202022-03-11%20at%205.09.09%20PM.png)
 
 * Testing EC2 w/LoaderIO
-  *  ![ScreenShot](/screenshots/Screen%20Shot%202022-03-14%20at%209.25.21%20AM%201.png)
+    ![ScreenShot](/screenshots/Screen%20Shot%202022-03-14%20at%2010.13.59%20AM.png)
+
+## Installation
+1. Git Fork and Clone this repo
+2. Open up a new terminal and run the following command to install dependencies:
+```
+npm install
+```
+2. Create a copy of .envCopy replace name to .env
+3. Replace empty string with youre correct database personal information
+
+## Setup
+1. In separate terminals, run the following commands to start server and build webpack bundle
+```
+npm run start
+```
+2. In your browser, go to API:
+```
+http://localhost:3000
+```
 
 # Overview Of Tables/Schema
 * Consited of four tables
@@ -87,24 +106,4 @@ while optimizing to handle over 4000 request per second
       },
       // ...
   }
-```
-
-## Installation
-1. Git Fork and Clone this repo
-2. Open up a new terminal and run the following command to install dependencies:
-```
-npm install
-```
-2. Create a copy of .envCopy replace name to .env
-3. Replace empty string with youre correct database personal information
-
-## Setup
-1. In separate terminals, run the following commands to start server and build webpack bundle
-```
-npm run start
-```
-```
-2. In your browser, go to API:
-```
-http://localhost:3000
 ```
