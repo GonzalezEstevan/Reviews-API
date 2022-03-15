@@ -17,7 +17,7 @@ while optimizing to handle over 4000 request per second
 
 ## Features
 * [Testing](#testing)
-* [Data Shape](#overview-of-tables/schema)
+* [Data Shape](#overview-of-data-shape)
 
 # Testing
 * Testing Locally
@@ -45,8 +45,8 @@ npm run start
 http://localhost:3000
 ```
 
-# Overview Of Tables/Schema
-* Consited of four tables
+# Overview Of Data Shape
+* Reviews Endpoint
    `Get /reviews`
    Returns a list of reviews for a particular product
 
