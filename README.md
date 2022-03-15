@@ -24,7 +24,7 @@ while optimizing to handle over 4000 request per second
    ![ScreenShot](/screenshots/Screen%20Shot%202022-03-11%20at%205.09.09%20PM.png)
 
 * Testing EC2 w/LoaderIO
-    ![ScreenShot](/screenshots/Screen%20Shot%202022-03-14%20at%2010.13.59%20AM.png)
+    ![ScreenShot](/screenshots/Screen%20Shot%202022-03-14%20at%204.59.50%20PM.png)
 
 ## Installation
 1. Git Fork and Clone this repo
@@ -48,6 +48,18 @@ http://localhost:3000
 # Overview Of Tables/Schema
 * Consited of four tables
    `Get /reviews`
+   Returns a list of reviews for a particular product
+
+    Parameters
+
+    | Parameter | Type    | Description                                               |
+    | --------- | ------- | --------------------------------------------------------- |
+    | page      | integer | Selects the page of results to return.  Default 1.        |
+    | count     | integer | Specifies how many results per page to return. Default 5. |
+    | sort      | text    | 	Changes the sort order of reviews to be based on        |
+    |           |         | "newest",  "helpful", or "relevant"                       |
+    |product_id | integer | Specifies the product for which to retrieve reviews.      |
+
     ```json
   {
   "product": "2",
@@ -78,6 +90,15 @@ http://localhost:3000
     ```
   * Meta Data
    `Get /reviews/meta`
+   Returns review metadata for a given product.
+
+   Parameters
+
+    | Parameter | Type    | Description                                               |
+    | --------- | ------- | --------------------------------------------------------- |
+    |product_id	| integer |Required ID of the product for which data should be
+    |           |         | returned                                                   |
+
   ```json
   {
     "product_id": "2",
@@ -106,4 +127,4 @@ http://localhost:3000
       },
       // ...
   }
-```
+
