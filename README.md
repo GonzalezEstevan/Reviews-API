@@ -10,6 +10,7 @@ while optimizing to handle over 4000 request per second
   * Indexing
   * Caching
   * Horizontally scaling
+  * Nginx Load Balencer
 
 * Testing:
   * k6
