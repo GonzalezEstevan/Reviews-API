@@ -17,7 +17,7 @@ while optimizing to handle over 4000 request per second
 
 ## Features
 * [Testing](#testing)
-* [Data Shape](#questions--answers-module)
+* [Data Shape](#overview-of-tables/schema)
 
 # Testing
 * Testing Locally
