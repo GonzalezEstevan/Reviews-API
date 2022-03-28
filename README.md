@@ -1,7 +1,6 @@
 # Reviews-API
 ## Overview
-Creating a back end to deal with millions of rows of data consisting of complicated data shape
-while optimizing to handle over 4000 request per second
+Reviews API that holds millions of data entries designed to quickly retrieve information for an e-commerce front-end. Tested with K6, loaderIO, and optimized with an Nginx load balancer.
 
 #Built by
 * [Estevan Gonzalez](https://github.com/GonzalezEstevan)
